@@ -7,10 +7,10 @@ import os
 
 app = FastAPI()
 
-# ✅ CORS FIX
+# ✅ Precise CORS config for Replit
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://htmltestsuite--taeaslahk.repl.co"],  # exact Replit preview domain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -81,3 +81,7 @@ async def ask_question(question: str = Form(...), content: str = Form(...)):
 
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
+
+@app.options("/{any_path:path}")
+async def preflight(any_path: str):
+    return JSONResponse(content={"message": "CORS OK"})
