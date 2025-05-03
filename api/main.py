@@ -7,10 +7,10 @@ import os
 
 app = FastAPI()
 
-# ✅ Enable CORS for Replit → Vercel
+# ✅ CORS FIX
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For security, replace with your actual Replit URL
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -36,15 +36,12 @@ async def upload_pdf(file: UploadFile = File(...)):
         files = {"file": (file.filename, await file.read(), file.content_type)}
         data = {"conversion_formats": {"markdown": True}}
 
-        # Send to MathPix
         r = requests.post(MATHPIX_URL, headers=headers, files=files, data={"options_json": str(data)})
         r.raise_for_status()
         job = r.json()
         job_id = job.get("pdf_id")
 
-        # Get markdown output
-        text_result = requests.get(f"https://api.mathpix.com/v3/pdf/{job_id}.markdown",
-                                   headers=headers)
+        text_result = requests.get(f"https://api.mathpix.com/v3/pdf/{job_id}.markdown", headers=headers)
         extracted_text = text_result.text
 
         return JSONResponse(content={"status": "success", "content": extracted_text})
