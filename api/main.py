@@ -1,10 +1,20 @@
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 import requests
 import openai
 import os
 
 app = FastAPI()
+
+# ✅ Enable CORS for Replit → Vercel
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # For security, replace with your actual Replit URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Load from Vercel Environment Variables
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -24,7 +34,7 @@ async def upload_pdf(file: UploadFile = File(...)):
             "app_key": MATHPIX_APP_KEY
         }
         files = {"file": (file.filename, await file.read(), file.content_type)}
-        data = {"conversion_formats": {"text": True}}
+        data = {"conversion_formats": {"markdown": True}}
 
         # Send to MathPix
         r = requests.post(MATHPIX_URL, headers=headers, files=files, data={"options_json": str(data)})
@@ -32,8 +42,8 @@ async def upload_pdf(file: UploadFile = File(...)):
         job = r.json()
         job_id = job.get("pdf_id")
 
-        # Poll for result (simplified)
-        text_result = requests.get(f"https://api.mathpix.com/v3/pdf/{job_id}.text",
+        # Get markdown output
+        text_result = requests.get(f"https://api.mathpix.com/v3/pdf/{job_id}.markdown",
                                    headers=headers)
         extracted_text = text_result.text
 
