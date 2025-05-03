@@ -47,7 +47,7 @@ async def upload_pdf(file: UploadFile = File(...)):
 @app.post("/ask")
 async def ask_question(question: str = Form(...), content: str = Form(...)):
     try:
-        prompt = f\"\"\"
+        prompt = f"""
 你是一位经验丰富的高考英语助教。以下是通过OCR系统识别并提取的试题内容，已经整理成纯文本格式：
 
 【高考试卷内容】
