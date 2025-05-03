@@ -1,5 +1,5 @@
 fastapi
 requests
-openai
+openai==0.28.1
 uvicorn
 python-multipart
