@@ -1,5 +1,0 @@
-fastapi
-requests
-openai
-uvicorn
-python-multipart
