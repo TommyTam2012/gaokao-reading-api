@@ -9,7 +9,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://htmltestsuite--taeaslahk.repl.co"],  # Your exact Replit frontend URL
+    allow_origins=["*"],  # ← allow all for now
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
