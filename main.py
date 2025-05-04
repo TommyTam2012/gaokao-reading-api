@@ -78,3 +78,6 @@ async def ask_question(question: str = Form(...), content: str = Form(...)):
 @app.options("/{any_path:path}")
 async def preflight(any_path: str):
     return JSONResponse(content={"message": "CORS OK"})
+@app.get("/")
+async def home():
+    return JSONResponse(content={"message": "✅ Gaokao Reading API is live on Vercel."})
