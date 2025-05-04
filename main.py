@@ -81,3 +81,46 @@ async def preflight(any_path: str):
 @app.get("/")
 async def home():
     return JSONResponse(content={"message": "✅ Gaokao Reading API is live on Vercel."})
+@app.post("/followup")
+async def ask_followup_question(
+    followup_question: str = Form(...),
+    content: str = Form(...),
+    question: str = Form(...),
+    previous_answer: str = Form(...)
+):
+    try:
+        prompt = f"""
+你是一位经验丰富的高考英语助教。以下是学生通过OCR上传的阅读材料：
+
+【高考试卷内容】
+{content}
+
+学生之前提出的问题：
+“{question}”
+
+你给出的原始答案是：
+{previous_answer}
+
+现在学生又提出了一个新的问题：
+“{followup_question}”
+
+请你参考原始内容、原始提问和你之前的回答，来回答学生的新问题。
+
+请用下面的格式作答：
+
+1. ✅ 逻辑回应（围绕学生当前的问题展开）
+2. 📘 中文解释（引用原文片段，解释你的推理）
+3. 🌱 学习建议（帮助学生理解类似题型）
+
+请用简洁清晰的中文回答，适合高中生理解。
+"""
+
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.5
+        )
+
+        return JSONResponse(content={"answer": response["choices"][0]["message"]["content"]})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
