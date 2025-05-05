@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>上传 PDF 文件</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="slide-up">上传你的 PDF 文件</h1>
+        <p class="slide-up">选择一个 PDF 文件并将其发送给 AI 进行分析</p>
+
+        <form id="uploadForm" class="slide-up">
+            <input type="file" id="pdfFile" accept="application/pdf">
+            <br><br>
+            <button type="submit" class="btn btn-primary">上传并分析</button>
+        </form>
+
+        <p id="statusMessage" class="footer"></p>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const file = document.getElementById('pdfFile').files[0];
+            if (!file) return alert("请选择一个 PDF 文件");
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            try {
+                const response = await fetch("/api/analyze", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const result = await response.json();
+                document.getElementById("statusMessage").textContent = result.message || "分析完成！";
+            } catch (error) {
+                document.getElementById("statusMessage").textContent = "上传失败，请稍后再试。";
+            }
+        });
+    </script>
+</body>
+</html>
