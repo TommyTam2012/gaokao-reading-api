@@ -23,7 +23,7 @@ def extract_text_with_mathpix(pdf_file):
     pages = convert_from_bytes(pdf_file.read(), dpi=200)
     extracted_text = ""
 
-    for i, page in enumerate(pages[:3]):
+    for i, page in enumerate(pages[:3]):  # Stay at 3 pages for now
         img_b64 = image_to_base64(page)
         headers = {
             "app_id": MATHPIX_APP_ID,
@@ -41,7 +41,7 @@ def extract_text_with_mathpix(pdf_file):
             result = response.json()
             extracted_text += result.get("text", "") + "\n"
         else:
-            print(f"MathPix OCR error (page {i+1}):", response.text)
+            print(f"❌ MathPix OCR error (page {i+1}):", response.text)
 
     return extracted_text.strip()
 
@@ -54,19 +54,33 @@ def analyze():
         file = request.files["file"]
         question = request.form["question"]
 
-        # 🧠 Extract text from scanned PDF
+        # Extract scanned text from the uploaded PDF
         extracted_text = extract_text_with_mathpix(file)
 
         if not extracted_text:
             return jsonify({"answer": "⚠️ OCR 无法识别任何文字，请上传清晰的 PDF 文件。"})
 
-        prompt = f"""以下是文档内容：
+        # 👇 Debug: Log extracted text and question
+        print("📄 Extracted text (first 1000 chars):", extracted_text[:1000])
+        print("❓ Student question:", question)
 
+        # 🧠 Improved Prompt for GPT
+        prompt = f"""
+你是一位专门帮助高考学生理解阅读理解文章和考试题目的AI老师。
+
+以下是从学生上传的PDF中提取的内容（部分节选）：
+
+----------------
 {extracted_text}
+----------------
 
-问题如下：{question}
+学生的问题如下：
+{question}
 
-请基于文档内容回答："""
+请用中文简洁、准确地回答这个问题。如果你需要从上面的内容中推断，也请指出你的推理依据。
+"""
+
+        print("📝 Prompt sent to OpenAI:", prompt[:1000])  # limit print length
 
         ai_response = openai.ChatCompletion.create(
             model="gpt-4",
@@ -76,9 +90,14 @@ def analyze():
         )
 
         answer = ai_response["choices"][0]["message"]["content"].strip()
+        if not answer:
+            answer = "⚠️ AI 没有返回答案。请尝试更换问题或上传更清晰的 PDF。"
+
+        print("✅ OpenAI answer:", answer[:300])
         return jsonify({"answer": answer})
 
     except Exception as e:
+        print("❌ Backend error:", str(e))
         return jsonify({"error": str(e)}), 500
 
 @app.route("/", methods=["GET"])
