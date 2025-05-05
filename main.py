@@ -62,20 +62,19 @@ def analyze():
         if not question:
             return jsonify({"error": "Missing question"}), 400
 
-        # ✅ Step 1: System role prompt (always present)
+        # ✅ Step 1: System prompt (always included)
         system_message = {
             "role": "system",
             "content": (
                 "你是一位专门指导高考英语阅读理解的AI老师。"
-                "请用中文回答学生的问题。"
-                "如果学生提到某个题号（如Question 23），你需要结合之前的对话或上传的文章内容来回答。"
-                "请不要要求重新上传或重复问题内容。你要作为一个有记忆的老师，直接回应。"
+                "请用中文回答学生的问题，逻辑清晰、语言通俗易懂。"
+                "如果学生提到某个题号（如Question 23），请结合上下文进行分析，不要要求学生重复内容或重新上传。"
             )
         }
 
         messages = [system_message]
 
-        # ✅ Step 2: File Upload (First Question)
+        # ✅ Step 2: On first upload, inject OCR content as memory
         if file:
             print("📥 New PDF received.")
             extracted_text = extract_text_with_mathpix(file)
@@ -83,11 +82,11 @@ def analyze():
             if not extracted_text:
                 return jsonify({"answer": "⚠️ OCR 无法识别任何文字，请上传清晰的 PDF 文件。"})
 
-            content = f"以下是考生上传的PDF内容部分：\n{extracted_text}"
-            messages.append({"role": "user", "content": content})
+            # Store the OCR text as an assistant response, so GPT remembers it
+            ocr_summary = f"以下是考生上传的PDF内容部分：\n{extracted_text}"
+            messages.append({"role": "assistant", "content": ocr_summary})
 
         else:
-            # 🔁 Follow-Up with memory
             print("🔁 Follow-up question received.")
             for h in history:
                 messages.append({
@@ -95,10 +94,10 @@ def analyze():
                     "content": h["message"]
                 })
 
-        # ✅ Step 3: Append current student question
+        # ✅ Step 3: Append student's current question
         messages.append({"role": "user", "content": question})
 
-        print("🧠 GPT Message Flow:", messages[-3:])
+        print("🧠 Final GPT Message Flow:", messages[-3:])
 
         response = openai.ChatCompletion.create(
             model="gpt-4",
@@ -120,4 +119,4 @@ def analyze():
 
 @app.route("/", methods=["GET"])
 def home():
-    return jsonify({"message": "✅ Gaokao AI Backend with 中文回答 + 记忆功能 is live."})
+    return jsonify({"message": "✅ Gaokao AI Backend with 中文回答 + 记忆 + 上下文复用 已上线。"})
