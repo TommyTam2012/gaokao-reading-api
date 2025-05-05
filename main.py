@@ -3,33 +3,37 @@ import openai
 import requests
 import os
 import base64
-from pdf2image import convert_from_bytes
+import fitz  # PyMuPDF
 from io import BytesIO
+import traceback
 
 app = Flask(__name__)
 
+# ✅ Environment Variables from Vercel
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 MATHPIX_APP_ID = os.environ.get("MATHPIX_APP_ID")
 MATHPIX_APP_KEY = os.environ.get("MATHPIX_APP_KEY")
 
 openai.api_key = OPENAI_API_KEY
 
-def image_to_base64(image):
-    buffered = BytesIO()
-    image.save(buffered, format="PNG")
-    return base64.b64encode(buffered.getvalue()).decode()
-
 def extract_text_with_mathpix(pdf_file):
-    pages = convert_from_bytes(pdf_file.read(), dpi=200)
     extracted_text = ""
 
-    for i, page in enumerate(pages[:3]):  # Stay at 3 pages for now
-        img_b64 = image_to_base64(page)
+    # Open PDF with PyMuPDF
+    doc = fitz.open(stream=pdf_file.read(), filetype="pdf")
+
+    # Read up to 3 pages
+    for i, page in enumerate(doc.pages(0, min(3, doc.page_count))):
+        pix = page.get_pixmap(dpi=200)
+        img_bytes = pix.tobytes("png")
+        img_b64 = base64.b64encode(img_bytes).decode()
+
         headers = {
             "app_id": MATHPIX_APP_ID,
             "app_key": MATHPIX_APP_KEY,
             "Content-type": "application/json"
         }
+
         data = {
             "src": f"data:image/png;base64,{img_b64}",
             "formats": ["text"],
@@ -37,9 +41,12 @@ def extract_text_with_mathpix(pdf_file):
         }
 
         response = requests.post("https://api.mathpix.com/v3/text", json=data, headers=headers)
+
         if response.status_code == 200:
             result = response.json()
-            extracted_text += result.get("text", "") + "\n"
+            page_text = result.get("text", "")
+            print(f"📄 OCR Page {i+1}:", page_text[:200])
+            extracted_text += page_text + "\n"
         else:
             print(f"❌ MathPix OCR error (page {i+1}):", response.text)
 
@@ -54,17 +61,13 @@ def analyze():
         file = request.files["file"]
         question = request.form["question"]
 
-        # Extract scanned text from the uploaded PDF
+        # 🔍 Extract text from PDF
         extracted_text = extract_text_with_mathpix(file)
 
         if not extracted_text:
             return jsonify({"answer": "⚠️ OCR 无法识别任何文字，请上传清晰的 PDF 文件。"})
 
-        # 👇 Debug: Log extracted text and question
-        print("📄 Extracted text (first 1000 chars):", extracted_text[:1000])
-        print("❓ Student question:", question)
-
-        # 🧠 Improved Prompt for GPT
+        # 📝 GPT prompt
         prompt = f"""
 你是一位专门帮助高考学生理解阅读理解文章和考试题目的AI老师。
 
@@ -80,7 +83,7 @@ def analyze():
 请用中文简洁、准确地回答这个问题。如果你需要从上面的内容中推断，也请指出你的推理依据。
 """
 
-        print("📝 Prompt sent to OpenAI:", prompt[:1000])  # limit print length
+        print("📝 Prompt to OpenAI:", prompt[:500])
 
         ai_response = openai.ChatCompletion.create(
             model="gpt-4",
@@ -93,11 +96,11 @@ def analyze():
         if not answer:
             answer = "⚠️ AI 没有返回答案。请尝试更换问题或上传更清晰的 PDF。"
 
-        print("✅ OpenAI answer:", answer[:300])
+        print("✅ AI Answer:", answer[:300])
         return jsonify({"answer": answer})
 
     except Exception as e:
-        print("❌ Backend error:", str(e))
+        print("❌ Backend error:", traceback.format_exc())
         return jsonify({"error": str(e)}), 500
 
 @app.route("/", methods=["GET"])
