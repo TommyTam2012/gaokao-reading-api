@@ -6,6 +6,8 @@ function handleFileUpload() {
   const fileInput = document.getElementById('pdfFile');
   const file = fileInput.files[0];
 
+  console.log("🟢 File selected:", file.name);
+
   if (!file || file.type !== 'application/pdf') {
     alert('请选择一个有效的 PDF 文件');
     return;
@@ -103,6 +105,7 @@ async function submitQuestion() {
     document.getElementById('responseBox').textContent = '发生错误，请稍后重试。';
   }
 }
+document.getElementById("pdfFile").addEventListener("change", handleFileUpload);
 
 function addToHistory(sender, message) {
   const historyBox = document.getElementById('historyBox');
