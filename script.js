@@ -68,7 +68,7 @@ function nextPage() {
   renderPage(currentPage);
 }
 
-// 🚀 Submit Question to AI
+// 🚀 Submit First Question to AI
 async function submitQuestion() {
   const question = document.getElementById('questionInput').value.trim();
   if (!uploadedPDF) {
@@ -100,6 +100,38 @@ async function submitQuestion() {
     addToHistory("🤖 AI", aiReply);
   } catch (error) {
     console.error("❌ Fetch failed:", error);
+    document.getElementById("responseBox").textContent = "发生错误，请稍后重试。";
+  }
+}
+
+// 🔁 Submit Follow-Up Question
+async function submitFollowUp() {
+  const followup = document.getElementById('followupInput').value.trim();
+  if (!followup) {
+    alert("请输入后续问题");
+    return;
+  }
+
+  addToHistory("🧑‍🎓 学生", followup);
+
+  try {
+    const response = await fetch("/api/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        question: followup,
+        history: JSON.stringify(conversationHistory)
+      })
+    });
+
+    const result = await response.json();
+    const aiReply = result.answer || result.message || "AI 没有返回答案";
+
+    document.getElementById("responseBox").textContent = aiReply;
+    addToHistory("🤖 AI", aiReply);
+    document.getElementById("followupInput").value = "";
+  } catch (err) {
+    console.error("❌ Follow-up failed:", err);
     document.getElementById("responseBox").textContent = "发生错误，请稍后重试。";
   }
 }
