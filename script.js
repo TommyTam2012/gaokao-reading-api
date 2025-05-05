@@ -92,6 +92,19 @@ async function submitQuestion() {
       method: "POST",
       body: formData
     });
+
+    const result = await response.json();
+    const aiReply = result.answer || result.message || "AI 没有返回答案";
+
+    document.getElementById("responseBox").textContent = aiReply;
+    addToHistory("🤖 AI", aiReply);
+  } catch (error) {
+    console.error("❌ Fetch failed:", error);
+    document.getElementById("responseBox").textContent = "发生错误，请稍后重试。";
+  }
+}
+
+// 🧹 Clear/Reset Button
 function clearFile() {
   uploadedPDF = null;
   document.getElementById("pdfFile").value = "";
@@ -103,17 +116,6 @@ function clearFile() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   console.log("🧹 Cleared uploaded file and reset viewer.");
-}
-
-    const result = await response.json();
-    const aiReply = result.answer || result.message || "AI 没有返回答案";
-
-    document.getElementById("responseBox").textContent = aiReply;
-    addToHistory("🤖 AI", aiReply);
-  } catch (error) {
-    console.error("❌ Fetch failed:", error);
-    document.getElementById("responseBox").textContent = "发生错误，请稍后重试。";
-  }
 }
 
 // 💬 Chat History
