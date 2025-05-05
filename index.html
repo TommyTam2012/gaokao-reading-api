@@ -1,30 +1,139 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="TommySir's 高考阅读、语法 AI辅助考试练习 - 上传PDF文档并提出问题，AI将帮助你解答。通过智能分析提高阅读理解能力。">
-    <meta name="keywords" content="高考阅读, AI辅助, PDF分析, 智能问答系统, 高考备考">
-    <title>TommySir's 高考阅读、语法 AI辅助考试练习</title>
-    <link rel="icon" href="generated-icon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TommySir's 高考 AI 阅读练习</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    body {
+      background-color: #0d1117;
+      color: #c9d1d9;
+      font-family: 'Microsoft YaHei', sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #58a6ff;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background-color: #161b22;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+    }
+
+    .card h2 {
+      border-left: 4px solid #58a6ff;
+      padding-left: 10px;
+      color: #79c0ff;
+    }
+
+    .flex {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .half {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    input[type="file"],
+    textarea,
+    button {
+      width: 100%;
+      font-size: 1rem;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: none;
+    }
+
+    button {
+      background-color: #238636;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #2ea043;
+    }
+
+    .pdf-preview {
+      height: 400px;
+      overflow: auto;
+      border: 1px solid #30363d;
+      background-color: #0d1117;
+      padding: 10px;
+      color: #c9d1d9;
+    }
+
+    .response-box, .history-box {
+      height: 180px;
+      overflow-y: auto;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .logo {
+      max-width: 180px;
+      display: block;
+      margin: 0 auto 10px;
+    }
+  </style>
 </head>
 <body>
-    <div class="glow"></div>
-    <div class="container">
-        <img src="White and Red Clean Future of AI YouTube Thumbnail.png" alt="TAEASLA Logo" class="logo fade-in">
-        <h1 class="slide-up">TommySir's 高考阅读、语法<br>AI辅助考试练习</h1>
-        <p class="slide-up">上传PDF文件并提出问题，AI将帮助你解答<br>通过智能分析提高你的阅读理解能力和考试成绩</p>
-        
-        <div class="buttons slide-up">
-            <a href="/pdf-uploader-example.html" class="btn btn-primary">开始使用</a>
-        </div>
-        
-        <div class="footer">
-            <p>© 2025 TommySir's 高考阅读练习系统</p>
-        </div>
+
+  <img src="White and Red Clean Future of AI YouTube Thumbnail.png" class="logo" alt="Logo">
+
+  <h1>TommySir's 高考阅读、语法 AI辅助考试练习</h1>
+
+  <!-- File Upload -->
+  <div class="card">
+    <h2>📄 文件上传</h2>
+    <input type="file" id="pdfFile" accept="application/pdf">
+    <button onclick="handleFileUpload()">选择文件</button>
+    <button onclick="clearFile()" style="background-color:#da3633; margin-top:10px;">删除文件</button>
+  </div>
+
+  <!-- PDF Viewer + Preview -->
+  <div class="flex">
+    <div class="card half">
+      <h2>📂 文件预览</h2>
+      <div id="pdfPreview" class="pdf-preview">请上传PDF文件以预览</div>
     </div>
-    
-    <script src="/script.js"></script>
+
+    <div class="card half">
+      <h2>💬 问题查询</h2>
+      <textarea id="questionInput" rows="5" placeholder="请输入您的问题..."></textarea>
+      <button onclick="submitQuestion()">提交问题</button>
+    </div>
+  </div>
+
+  <!-- AI Response -->
+  <div class="flex">
+    <div class="card half">
+      <h2>📢 回答结果</h2>
+      <div id="responseBox" class="response-box">提交问题后查看AI回答</div>
+    </div>
+
+    <div class="card half">
+      <h2>📜 历史对话</h2>
+      <div id="historyBox" class="history-box">这里将显示你与AI的历史对话</div>
+    </div>
+  </div>
+
+  <script src="/script.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.min.js"></script>
 </body>
 </html>
