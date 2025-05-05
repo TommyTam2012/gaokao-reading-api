@@ -103,7 +103,7 @@ def analyze():
             model="gpt-4",
             messages=messages,
             temperature=0.3,
-            max_tokens=600
+            max_tokens=1200
         )
 
         answer = response["choices"][0]["message"]["content"].strip()
