@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TommySir's 高考 AI 阅读练习</title>
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/style.css" />
   <style>
     body {
       background-color: #0d1117;
@@ -25,7 +25,7 @@
       border-radius: 10px;
       padding: 20px;
       margin-bottom: 20px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
     }
 
     .card h2 {
@@ -76,7 +76,8 @@
       color: #c9d1d9;
     }
 
-    .response-box, .history-box {
+    .response-box,
+    .history-box {
       height: 180px;
       overflow-y: auto;
       background: #0d1117;
@@ -93,20 +94,20 @@
   </style>
 </head>
 <body>
-
-  <img src="White and Red Clean Future of AI YouTube Thumbnail.png" class="logo" alt="Logo">
+  <!-- ✅ Correct logo reference -->
+  <img src="taeasla-logo.png" class="logo" alt="TAEASLA Logo" />
 
   <h1>TommySir's 高考阅读、语法 AI辅助考试练习</h1>
 
-  <!-- File Upload -->
   <div class="card">
     <h2>📄 文件上传</h2>
-    <input type="file" id="pdfFile" accept="application/pdf">
+    <input type="file" id="pdfFile" accept="application/pdf" />
     <button onclick="handleFileUpload()">选择文件</button>
-    <button onclick="clearFile()" style="background-color:#da3633; margin-top:10px;">删除文件</button>
+    <button onclick="clearFile()" style="background-color: #da3633; margin-top: 10px;">
+      删除文件
+    </button>
   </div>
 
-  <!-- PDF Viewer + Preview -->
   <div class="flex">
     <div class="card half">
       <h2>📂 文件预览</h2>
@@ -120,7 +121,6 @@
     </div>
   </div>
 
-  <!-- AI Response -->
   <div class="flex">
     <div class="card half">
       <h2>📢 回答结果</h2>
