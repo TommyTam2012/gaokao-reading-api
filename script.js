@@ -104,7 +104,7 @@ async function submitQuestion() {
   }
 }
 
-// 🔁 Submit Follow-Up Question
+// 🔁 Submit Follow-Up Question (No new file upload)
 async function submitFollowUp() {
   const followup = document.getElementById('followupInput').value.trim();
   if (!followup) {
