@@ -1,74 +1,114 @@
-/**
- * Main script for the TommySir's 高考阅读、语法 AI辅助考试练习 application
- */
+let uploadedPDF = null;
+let conversationHistory = [];
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize the application when the DOM is fully loaded
-    initApp();
-});
+function handleFileUpload() {
+  const fileInput = document.getElementById('pdfFile');
+  const file = fileInput.files[0];
 
-/**
- * Initialize the application components
- */
-function initApp() {
-    console.log('Application initialized');
-    
-    // Add event listeners to buttons
-    const startButton = document.querySelector('.btn-primary');
-    if (startButton) {
-        startButton.addEventListener('click', function(e) {
-            console.log('Start button clicked');
-        });
-    }
-    
-    // Add smooth scrolling for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
-            e.preventDefault();
-            const targetId = this.getAttribute('href');
-            const targetElement = document.querySelector(targetId);
-            
-            if (targetElement) {
-                targetElement.scrollIntoView({
-                    behavior: 'smooth'
-                });
+  if (!file || file.type !== 'application/pdf') {
+    alert('请选择一个有效的 PDF 文件');
+    return;
+  }
+
+  uploadedPDF = file;
+  renderPDFPreview(file);
+  document.getElementById('pdfPreview').innerHTML = '正在加载 PDF 预览...';
+}
+
+function clearFile() {
+  uploadedPDF = null;
+  document.getElementById('pdfFile').value = '';
+  document.getElementById('pdfPreview').innerHTML = '请上传PDF文件以预览';
+}
+
+function renderPDFPreview(file) {
+  const pdfPreview = document.getElementById('pdfPreview');
+  const fileReader = new FileReader();
+
+  fileReader.onload = function () {
+    const typedArray = new Uint8Array(this.result);
+
+    pdfjsLib.getDocument(typedArray).promise.then(pdf => {
+      let pagesRendered = 0;
+      pdfPreview.innerHTML = '';
+
+      for (let pageNum = 1; pageNum <= Math.min(pdf.numPages, 3); pageNum++) {
+        pdf.getPage(pageNum).then(page => {
+          const scale = 1.2;
+          const viewport = page.getViewport({ scale });
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+
+          const renderContext = {
+            canvasContext: context,
+            viewport: viewport
+          };
+
+          page.render(renderContext).promise.then(() => {
+            pdfPreview.appendChild(canvas);
+            pagesRendered++;
+            if (pagesRendered === Math.min(pdf.numPages, 3)) {
+              console.log('PDF 预览完成');
             }
+          });
         });
+      }
+    }).catch(error => {
+      pdfPreview.innerHTML = '无法加载 PDF: ' + error.message;
     });
-    
-    // Check if the API service is available
-    checkApiAvailability();
+  };
+
+  fileReader.readAsArrayBuffer(file);
 }
 
-/**
- * Check if the API service is available
- */
-async function checkApiAvailability() {
-    try {
-        const response = await fetch('/health');
-        const data = await response.json();
-        
-        if (data.status === 'ok') {
-            console.log('API service is available');
-        } else {
-            console.warn('API service status warning:', data.message);
-        }
-    } catch (error) {
-        console.error('API service is not available:', error);
-    }
+async function submitQuestion() {
+  const question = document.getElementById('questionInput').value.trim();
+  if (!uploadedPDF) {
+    alert('请先上传PDF文件');
+    return;
+  }
+  if (!question) {
+    alert('请输入问题');
+    return;
+  }
+
+  // Append to history
+  addToHistory('🧑‍🎓 学生', question);
+
+  // Prepare form data
+  const formData = new FormData();
+  formData.append('file', uploadedPDF);
+  formData.append('question', question);
+  formData.append('history', JSON.stringify(conversationHistory));
+
+  try {
+    const response = await fetch('/api/analyze', {
+      method: 'POST',
+      body: formData
+    });
+
+    const result = await response.json();
+    const aiReply = result.answer || result.message || 'AI 没有返回答案';
+
+    // Show response
+    document.getElementById('responseBox').textContent = aiReply;
+
+    // Save to history
+    addToHistory('🤖 AI', aiReply);
+  } catch (err) {
+    console.error(err);
+    document.getElementById('responseBox').textContent = '发生错误，请稍后重试。';
+  }
 }
 
-/**
- * Add a glowing effect that follows the mouse
- */
-document.addEventListener('mousemove', function(e) {
-    const glowElement = document.querySelector('.glow');
-    if (glowElement) {
-        // Only update every few frames for performance
-        if (Math.random() > 0.9) {
-            glowElement.style.top = e.pageY + 'px';
-            glowElement.style.left = e.pageX + 'px';
-            glowElement.style.transform = 'translate(-50%, -50%)';
-        }
-    }
-});
+function addToHistory(sender, message) {
+  const historyBox = document.getElementById('historyBox');
+  conversationHistory.push({ sender, message });
+
+  const entry = document.createElement('div');
+  entry.innerHTML = `<strong>${sender}:</strong><br>${message}<hr>`;
+  historyBox.appendChild(entry);
+  historyBox.scrollTop = historyBox.scrollHeight;
+}
