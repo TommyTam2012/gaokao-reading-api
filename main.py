@@ -49,55 +49,63 @@ def extract_text_with_mathpix(pdf_file):
 
     return extracted_text.strip()
 
-# 🧠 GPT-Powered AI Tutor
 @app.route("/api/analyze", methods=["POST"])
 def analyze():
     try:
         question = request.form.get("question", "").strip()
         history_raw = request.form.get("history", "[]")
         history = json.loads(history_raw)
-
         file = request.files.get("file")
 
         if not question:
             return jsonify({"error": "Missing question"}), 400
 
-        # ✅ Step 1: System prompt (always included)
         system_message = {
             "role": "system",
             "content": (
                 "你是一位专门指导高考英语阅读理解的AI老师。"
                 "请用中文回答学生的问题，逻辑清晰、语言通俗易懂。"
-                "如果学生提到某个题号（如Question 23），请结合上下文进行分析，不要要求学生重复内容或重新上传。"
+                "如果学生提到某个题号（如Question 23），请结合上传的文章内容和上下文进行分析，"
+                "不要要求学生重复或重新上传内容。"
             )
         }
 
         messages = [system_message]
 
-        # ✅ Step 2: On first upload, inject OCR content as memory
+        # ✅ Inject OCR for new upload
         if file:
             print("📥 New PDF received.")
             extracted_text = extract_text_with_mathpix(file)
-
             if not extracted_text:
                 return jsonify({"answer": "⚠️ OCR 无法识别任何文字，请上传清晰的 PDF 文件。"})
 
-            # Store the OCR text as an assistant response, so GPT remembers it
             ocr_summary = f"以下是考生上传的PDF内容部分：\n{extracted_text}"
             messages.append({"role": "assistant", "content": ocr_summary})
 
         else:
             print("🔁 Follow-up question received.")
+
+            # ✅ Load history
             for h in history:
                 messages.append({
                     "role": "user" if "学生" in h["sender"] else "assistant",
                     "content": h["message"]
                 })
 
-        # ✅ Step 3: Append student's current question
+            # ✅ Check if OCR content is missing
+            ocr_already_present = any("PDF内容部分" in m["content"] for m in messages if m["role"] == "assistant")
+
+            if not ocr_already_present:
+                print("🔁 OCR summary missing — reinjecting from last session.")
+                messages.insert(1, {
+                    "role": "assistant",
+                    "content": "请注意：以下是之前上传的PDF内容片段，如果有提到题号，请参考这些信息进行推理。"
+                })
+
+        # Add the current question
         messages.append({"role": "user", "content": question})
 
-        print("🧠 Final GPT Message Flow:", messages[-3:])
+        print("🧠 Final GPT Prompt Messages:", messages[-3:])
 
         response = openai.ChatCompletion.create(
             model="gpt-4",
@@ -119,4 +127,4 @@ def analyze():
 
 @app.route("/", methods=["GET"])
 def home():
-    return jsonify({"message": "✅ Gaokao AI Backend with 中文回答 + 记忆 + 上下文复用 已上线。"})
+    return jsonify({"message": "✅ Gaokao AI Backend is live with 中文、记忆、上下文优化。"})
