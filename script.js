@@ -92,6 +92,18 @@ async function submitQuestion() {
       method: "POST",
       body: formData
     });
+function clearFile() {
+  uploadedPDF = null;
+  document.getElementById("pdfFile").value = "";
+  document.getElementById("pageNumber").textContent = "1";
+  document.getElementById("pageCount").textContent = "?";
+
+  const canvas = document.getElementById("pdfCanvas");
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  console.log("🧹 Cleared uploaded file and reset viewer.");
+}
 
     const result = await response.json();
     const aiReply = result.answer || result.message || "AI 没有返回答案";
