@@ -62,22 +62,32 @@ def analyze():
         if not question:
             return jsonify({"error": "Missing question"}), 400
 
-        messages = []
+        # ✅ Step 1: System role prompt (always present)
+        system_message = {
+            "role": "system",
+            "content": (
+                "你是一位专门指导高考英语阅读理解的AI老师。"
+                "请用中文回答学生的问题。"
+                "如果学生提到某个题号（如Question 23），你需要结合之前的对话或上传的文章内容来回答。"
+                "请不要要求重新上传或重复问题内容。你要作为一个有记忆的老师，直接回应。"
+            )
+        }
 
+        messages = [system_message]
+
+        # ✅ Step 2: File Upload (First Question)
         if file:
-            # 🧾 First Question — Include OCR Text
             print("📥 New PDF received.")
             extracted_text = extract_text_with_mathpix(file)
 
             if not extracted_text:
                 return jsonify({"answer": "⚠️ OCR 无法识别任何文字，请上传清晰的 PDF 文件。"})
 
-            intro = "你是一位专门帮助高考学生理解阅读理解文章和考试题目的AI老师。请根据以下文章内容回答问题："
-            content = f"\n\n文章内容如下：\n{extracted_text}"
-            messages.append({"role": "system", "content": intro + content})
+            content = f"以下是考生上传的PDF内容部分：\n{extracted_text}"
+            messages.append({"role": "user", "content": content})
 
         else:
-            # 🔁 Follow-Up — Use previous memory
+            # 🔁 Follow-Up with memory
             print("🔁 Follow-up question received.")
             for h in history:
                 messages.append({
@@ -85,16 +95,16 @@ def analyze():
                     "content": h["message"]
                 })
 
-        # Always add the latest student question
+        # ✅ Step 3: Append current student question
         messages.append({"role": "user", "content": question})
 
-        print("🧠 GPT Message Flow:", messages[-2:])
+        print("🧠 GPT Message Flow:", messages[-3:])
 
         response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=messages,
             temperature=0.3,
-            max_tokens=500
+            max_tokens=600
         )
 
         answer = response["choices"][0]["message"]["content"].strip()
@@ -106,8 +116,8 @@ def analyze():
 
     except Exception as e:
         print("❌ Backend error:", traceback.format_exc())
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"answer": f"⚠️ 服务器出错：{str(e)}"}), 500
 
 @app.route("/", methods=["GET"])
 def home():
-    return jsonify({"message": "✅ Gaokao AI Backend is live and memory-enabled."})
+    return jsonify({"message": "✅ Gaokao AI Backend with 中文回答 + 记忆功能 is live."})
