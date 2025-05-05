@@ -111,7 +111,13 @@
   <div class="flex">
     <div class="card half">
       <h2>📂 文件预览</h2>
-      <div id="pdfPreview" class="pdf-preview">请上传PDF文件以预览</div>
+     <div class="pdf-controls">
+  <button onclick="prevPage()">⬅️ 上一页</button>
+  <span>第 <span id="pageNumber">1</span> 页 / 共 <span id="pageCount">?</span> 页</span>
+  <button onclick="nextPage()">下一页 ➡️</button>
+</div>
+
+<canvas id="pdfCanvas" style="width:100%; border:1px solid #30363d; margin-top:10px;"></canvas>
     </div>
 
     <div class="card half">
