@@ -94,29 +94,25 @@
   </style>
 </head>
 <body>
-  <!-- ✅ Correct logo reference -->
-  <img src="/logo.png" class="logo" alt="TAEASLA Logo">
-
+  <!-- ✅ Updated logo path -->
+  
   <h1>TommySir's 高考阅读、语法 AI辅助考试练习</h1>
 
   <div class="card">
     <h2>📄 文件上传</h2>
     <input type="file" id="pdfFile" accept="application/pdf" />
-<button onclick="clearFile()" style="background-color: #da3633;">删除文件</button>
-      删除文件
-    </button>
+    <button onclick="clearFile()" style="background-color: #da3633;">删除文件</button>
   </div>
 
   <div class="flex">
     <div class="card half">
       <h2>📂 文件预览</h2>
-     <div class="pdf-controls">
-  <button onclick="prevPage()">⬅️ 上一页</button>
-  <span>第 <span id="pageNumber">1</span> 页 / 共 <span id="pageCount">?</span> 页</span>
-  <button onclick="nextPage()">下一页 ➡️</button>
-</div>
-
-<canvas id="pdfCanvas" style="width:100%; border:1px solid #30363d; margin-top:10px;"></canvas>
+      <div class="pdf-controls">
+        <button onclick="prevPage()">⬅️ 上一页</button>
+        <span>第 <span id="pageNumber">1</span> 页 / 共 <span id="pageCount">?</span> 页</span>
+        <button onclick="nextPage()">下一页 ➡️</button>
+      </div>
+      <canvas id="pdfCanvas" style="width:100%; border:1px solid #30363d; margin-top:10px;"></canvas>
     </div>
 
     <div class="card half">
@@ -127,10 +123,10 @@
   </div>
   
   <div style="margin-top: 20px;">
-  <label for="followupInput" style="color: #79c0ff;">🔁 继续提问：</label>
-  <textarea id="followupInput" rows="3" placeholder="请输入你的后续问题..."></textarea>
-  <button onclick="submitFollowUp()" class="btn btn-primary">提交后续问题</button>
-</div>
+    <label for="followupInput" style="color: #79c0ff;">🔁 继续提问：</label>
+    <textarea id="followupInput" rows="3" placeholder="请输入你的后续问题..."></textarea>
+    <button onclick="submitFollowUp()" class="btn btn-primary">提交后续问题</button>
+  </div>
 
   <div class="flex">
     <div class="card half">
@@ -144,7 +140,7 @@
     </div>
   </div>
 
- <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.min.js"></script>
-<script src="/script.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.min.js"></script>
+  <script src="/script.js"></script>
 </body>
 </html>
