@@ -8,7 +8,7 @@
   ],
   "routes": [
     { "src": "/api/.*", "dest": "main.py" },
-    { "handle": "filesystem" },
-    { "src": "/.*", "dest": "index.html" }
+    { "handle": "filesystem" },              // ✅ Checks for /logo.png first
+    { "src": "/.*", "dest": "index.html" }   // ✅ Catch-all AFTER static check
   ]
 }
