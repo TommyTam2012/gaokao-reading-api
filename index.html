@@ -67,15 +67,6 @@
       background-color: #2ea043;
     }
 
-    .pdf-preview {
-      height: 400px;
-      overflow: auto;
-      border: 1px solid #30363d;
-      background-color: #0d1117;
-      padding: 10px;
-      color: #c9d1d9;
-    }
-
     .response-box,
     .history-box {
       height: 180px;
@@ -87,15 +78,17 @@
     }
 
     .logo {
-      max-width: 180px;
+      max-width: 360px;
       display: block;
-      margin: 0 auto 10px;
+      margin: 0 auto 20px;
     }
   </style>
 </head>
 <body>
-  <!-- ✅ Updated logo path -->
-  
+
+  <!-- ✅ Logo properly referenced from /public -->
+  <img src="/logo.png" class="logo" alt="TAEASLA 学校标志">
+
   <h1>TommySir's 高考阅读、语法 AI辅助考试练习</h1>
 
   <div class="card">
