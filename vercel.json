@@ -4,9 +4,11 @@
     { "src": "main.py", "use": "@vercel/python" },
     { "src": "index.html", "use": "@vercel/static" },
     { "src": "style.css", "use": "@vercel/static" },
-    { "src": "script.js", "use": "@vercel/static" }
+    { "src": "script.js", "use": "@vercel/static" },
+    { "src": "public/logo.png", "use": "@vercel/static" }
   ],
   "routes": [
+    { "src": "/logo.png", "dest": "public/logo.png" },     // ✅ Serve logo directly
     { "src": "/api/.*", "dest": "main.py" },
     { "handle": "filesystem" },
     { "src": "/.*", "dest": "index.html" }
